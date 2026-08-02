@@ -15,12 +15,12 @@ const app = express();
 
 // ==================== MIDDLEWARE ====================
 
-// CORS configuration
+// CORS configuration - Updated with proper origins
 const corsOptions = {
   origin: [
+    'https://sena-nepali.onrender.com',
+    'https://sena-nepali-backend.onrender.com',
     'http://localhost:4000',
-    'https://sena-nepali-backend.onrender.com/',
-    'https://sena-nepali.onrender.com/',
     'http://127.0.0.1:4000',
     'http://localhost:3000',
     'http://127.0.0.1:3000',
@@ -29,11 +29,13 @@ const corsOptions = {
     process.env.FRONTEND_URL,
   ].filter(Boolean),
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
   optionsSuccessStatus: 200,
 };
 
+// Apply CORS middleware
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 
@@ -44,6 +46,12 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 // Static files
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
+// Request logging middleware (optional but helpful)
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url} - ${req.ip}`);
+  next();
+});
+
 // ==================== ROUTES ====================
 
 // Health check
@@ -53,6 +61,7 @@ app.get('/api/health', (req, res) => {
     message: 'Server is running',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
+    uptime: process.uptime(),
   });
 });
 
@@ -63,6 +72,7 @@ app.use('/api/leadership', require('./routes/leadership'));
 app.use('/api/central-committee', require('./routes/centralCommittee'));
 app.use('/api/gallery', require('./routes/gallery'));
 app.use('/api/contact', require('./routes/contact'));
+app.use('/api/contact-messages', require('./routes/contactMessages'));
 app.use('/api/introduction', require('./routes/introduction'));
 app.use('/api/logos', require('./routes/logos'));
 app.use('/api/news', require('./routes/news'));
@@ -70,18 +80,17 @@ app.use('/api/events', require('./routes/events'));
 app.use('/api/notices', require('./routes/notices'));
 app.use('/api/interviews', require('./routes/interviews'));
 app.use('/api/settings', require('./routes/settings'));
-
-// SUPER ADMIN ROUTES - Add this line
 app.use('/api/superadmin', require('./routes/superAdmin'));
-// Add this with other routes
-app.use('/api/contact-messages', require('./routes/contactMessages'));
 
-// 404 handler
+// ==================== 404 HANDLER ====================
+
 app.use((req, res) => {
+  console.log(`404 - Route not found: ${req.method} ${req.originalUrl}`);
   res.status(404).json({
     success: false,
     message: 'Route not found',
     path: req.originalUrl,
+    method: req.method,
   });
 });
 
@@ -90,6 +99,7 @@ app.use((req, res) => {
 app.use((err, req, res, next) => {
   console.error('Error:', err.stack);
   
+  // Multer file size error
   if (err.code === 'LIMIT_FILE_SIZE') {
     return res.status(400).json({
       success: false,
@@ -97,6 +107,7 @@ app.use((err, req, res, next) => {
     });
   }
 
+  // Cloudinary error
   if (err.message && err.message.includes('Cloudinary')) {
     return res.status(500).json({
       success: false,
@@ -104,6 +115,25 @@ app.use((err, req, res, next) => {
     });
   }
 
+  // MongoDB duplicate key error
+  if (err.code === 11000) {
+    return res.status(400).json({
+      success: false,
+      message: 'Duplicate entry found. Please check your data.',
+    });
+  }
+
+  // Validation error
+  if (err.name === 'ValidationError') {
+    const messages = Object.values(err.errors).map(e => e.message);
+    return res.status(400).json({
+      success: false,
+      message: 'Validation error',
+      errors: messages,
+    });
+  }
+
+  // Default error
   res.status(err.status || 500).json({
     success: false,
     message: err.message || 'Internal server error',
@@ -138,8 +168,8 @@ const createDefaultAdmin = async () => {
 const createDefaultSuperAdmin = async () => {
   try {
     const SuperAdmin = require('./models/SuperAdmin');
-    const superEmail = 'super@gmail.com';
-    const superPassword = 'super123';
+    const superEmail = process.env.SUPER_ADMIN_EMAIL || 'super@gmail.com';
+    const superPassword = process.env.SUPER_ADMIN_PASSWORD || 'super123';
     
     const superExists = await SuperAdmin.findOne({ email: superEmail });
     if (!superExists) {
@@ -161,35 +191,39 @@ const createDefaultSuperAdmin = async () => {
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, async () => {
-  console.log('='.repeat(50));
+  console.log('='.repeat(60));
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🔗 API URL: http://localhost:${PORT}/api`);
-  console.log(`✅ Health check: http://localhost:${PORT}/api/health`);
-  console.log(`🔐 Super Admin: http://localhost:${PORT}/api/superadmin`);
-  console.log('='.repeat(50));
+  console.log(`🔗 API URL: ${process.env.API_URL || `http://localhost:${PORT}/api`}`);
+  console.log(`✅ Health check: ${process.env.API_URL || `http://localhost:${PORT}`}/api/health`);
+  console.log(`🌐 CORS enabled for: ${corsOptions.origin.join(', ')}`);
+  console.log('='.repeat(60));
   
   await createDefaultAdmin();
   await createDefaultSuperAdmin();
 });
 
+// ==================== GRACEFUL SHUTDOWN ====================
+
 process.on('SIGTERM', () => {
-  console.log('SIGTERM signal received: closing HTTP server');
+  console.log('🛑 SIGTERM signal received: closing HTTP server');
   process.exit(0);
 });
 
 process.on('SIGINT', () => {
-  console.log('SIGINT signal received: closing HTTP server');
+  console.log('🛑 SIGINT signal received: closing HTTP server');
   process.exit(0);
 });
 
 process.on('uncaughtException', (err) => {
-  console.error('Uncaught Exception:', err);
+  console.error('💥 Uncaught Exception:', err);
+  console.error('Stack:', err.stack);
   process.exit(1);
 });
 
 process.on('unhandledRejection', (err) => {
-  console.error('Unhandled Rejection:', err);
+  console.error('💥 Unhandled Rejection:', err);
+  console.error('Stack:', err.stack);
   process.exit(1);
 });
 
