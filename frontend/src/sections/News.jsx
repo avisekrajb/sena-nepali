@@ -34,7 +34,7 @@ export function News() {
     <section className="py-20 bg-gray-50">
       <Container>
         <div className="max-w-3xl mx-auto text-center mb-12">
-          <Eyebrow>Updates</Eyebrow>
+
           <h1 className="font-display text-3xl md:text-4xl font-bold text-army mt-4">
             Latest News
           </h1>
