@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Eyebrow } from '../components/ui/Section';
+import { Container } from '../components/ui/Section';
 import { centralCommitteeAPI } from '../services/api';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, Users } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const CentralCommittee = () => {
   const [committeeData, setCommitteeData] = useState({
@@ -73,10 +74,72 @@ const CentralCommittee = () => {
     return committeeData[titleKey] || sections.find(s => s.key === key)?.label || '';
   };
 
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: 'easeOut',
+      },
+    },
+  };
+
+  const cardVariants = {
+    hidden: { opacity: 0, scale: 0.95 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: 0.5,
+        ease: 'easeOut',
+      },
+    },
+    hover: {
+      y: -8,
+      scale: 1.02,
+      boxShadow: '0 20px 40px -12px rgba(0,0,0,0.2)',
+      transition: {
+        duration: 0.3,
+        ease: 'easeOut',
+      },
+    },
+  };
+
+  const titleVariants = {
+    hidden: { opacity: 0, y: -20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.7,
+        ease: 'easeOut',
+      },
+    },
+  };
+
   if (loading) {
     return (
       <section className="py-20 bg-white flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold"></div>
+        <motion.div
+          initial={{ scale: 0.5, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold"
+        />
       </section>
     );
   }
@@ -86,35 +149,59 @@ const CentralCommittee = () => {
     const hasMore = members.length > 8;
 
     return (
-      <>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+      >
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
           {displayMembers.map((member, index) => (
-            <div key={index} className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all border border-gray-100 overflow-hidden group">
+            <motion.div
+              key={index}
+              variants={cardVariants}
+              whileHover="hover"
+              className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all border border-gray-100 overflow-hidden group"
+            >
               <div className="aspect-square overflow-hidden bg-gray-100">
-                <img
+                <motion.img
                   src={member.image || 'https://placehold.co/400x400/1F3D2B/FFFFFF?text=Photo'}
                   alt={member.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   onError={(e) => {
                     e.target.src = 'https://placehold.co/400x400/1F3D2B/FFFFFF?text=Photo';
                   }}
+                  whileHover={{ scale: 1.1 }}
+                  transition={{ duration: 0.5 }}
                 />
               </div>
-              <div className="p-3 text-center">
-                <h3 className="font-semibold text-army text-sm truncate">{member.name}</h3>
-                <p className="text-xs text-gold-dark font-medium truncate">{member.role}</p>
+              <div className="p-4 text-center">
+                <h3 className="font-semibold text-army text-base md:text-lg truncate">
+                  {member.name}
+                </h3>
+                <p className="text-sm md:text-base text-gold-dark font-medium truncate">
+                  {member.role}
+                </p>
                 {member.bio && (
-                  <p className="text-xs text-gray-500 mt-1 line-clamp-2">{member.bio}</p>
+                  <p className="text-sm text-gray-500 mt-1.5 line-clamp-2 leading-relaxed">
+                    {member.bio}
+                  </p>
                 )}
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
         {hasMore && (
-          <div className="text-center mt-6">
-            <button
+          <motion.div
+            className="text-center mt-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            <motion.button
+              whileHover={{ scale: 1.05, boxShadow: '0 10px 30px -10px rgba(201, 162, 39, 0.5)' }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => toggleShow(sectionKey)}
-              className="inline-flex items-center gap-2 bg-gold text-white px-5 py-2 rounded-lg hover:bg-gold-dark transition-all"
+              className="inline-flex items-center gap-2 bg-gold text-white px-6 py-2.5 rounded-lg hover:bg-gold-dark transition-all shadow-md hover:shadow-lg text-sm font-medium"
             >
               {showAll[sectionKey] ? (
                 <>
@@ -127,53 +214,94 @@ const CentralCommittee = () => {
                   View All ({members.length})
                 </>
               )}
-            </button>
-          </div>
+            </motion.button>
+          </motion.div>
         )}
-      </>
+      </motion.div>
     );
   };
 
   return (
-    <section className="py-20 bg-gray-50">
+    <motion.section
+      className="py-20 bg-gray-50"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
       <Container>
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-         
-            <h1 className="font-display text-3xl md:text-4xl font-bold text-army mt-4">
+          {/* Title Section with Animation */}
+          <motion.div
+            className="text-center mb-14"
+            initial="hidden"
+            animate="visible"
+            variants={titleVariants}
+          >
+            <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-army">
               {committeeData.title || 'केन्द्रीय कार्यसमिति'}
             </h1>
-            <p className="text-gray-600 mt-4 text-lg">
+            <p className="text-gray-600 mt-4 text-lg md:text-xl max-w-3xl mx-auto leading-relaxed">
               Meet our dedicated leadership team across all levels of the organization.
             </p>
-          </div>
+            <motion.div
+              className="w-20 h-1 bg-gold mx-auto mt-4 rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: 80 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+            />
+          </motion.div>
 
-          {sections.map((section) => {
-            const members = committeeData[section.key] || [];
-            if (members.length === 0) return null;
+          {/* Sections */}
+          <AnimatePresence>
+            {sections.map((section) => {
+              const members = committeeData[section.key] || [];
+              if (members.length === 0) return null;
 
-            const title = getSectionTitle(section.key);
+              const title = getSectionTitle(section.key);
 
-            return (
-              <div key={section.key} className="mb-12 last:mb-0">
-                <div className="flex items-center gap-3 mb-6">
-                  <h2 className="font-display text-2xl font-bold text-army">{title}</h2>
-                  <span className="text-sm text-gray-400">({members.length})</span>
-                </div>
-                {renderMembers(members, section.key)}
-              </div>
-            );
-          })}
+              return (
+                <motion.div
+                  key={section.key}
+                  className="mb-14 last:mb-0"
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.6, delay: 0.1 }}
+                >
+                  <motion.div
+                    className="flex items-center gap-3 mb-6"
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <h2 className="font-display text-2xl md:text-3xl font-bold text-army">
+                      {title}
+                    </h2>
+                    <span className="text-sm md:text-base text-gray-400 bg-gray-100 px-3 py-1 rounded-full">
+                      {members.length}
+                    </span>
+                  </motion.div>
+                  {renderMembers(members, section.key)}
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
 
           {sections.every(s => (committeeData[s.key] || []).length === 0) && (
-            <div className="text-center py-12 text-gray-500">
-              <Users className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-              <p>No committee members available.</p>
-            </div>
+            <motion.div
+              className="text-center py-16 text-gray-500"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Users className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+              <p className="text-lg">No committee members available.</p>
+            </motion.div>
           )}
         </div>
       </Container>
-    </section>
+    </motion.section>
   );
 };
 
