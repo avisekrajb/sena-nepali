@@ -1,13 +1,16 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Search, ChevronDown, ChevronRight, Image as ImageIcon, Loader } from 'lucide-react';
+import { 
+  Menu, X, Search, ChevronDown, ChevronRight, 
+  Image as ImageIcon, Loader, Type, Minus, Plus
+} from 'lucide-react';
 import { Container } from './ui/Section';
 import { useSite } from '../context/SiteContext';
+import { useSize } from '../context/SizeContext';
 import { searchAllContent } from '../services/searchService';
 
 // Navigation configuration
-// Update the navConfig in Navbar.jsx
 const navConfig = {
   home: {
     label: 'Home',
@@ -24,7 +27,7 @@ const navConfig = {
       { label: 'Introduction', to: '/introduction' },
       { label: 'Mission', to: '/mission' },
       { label: 'Leadership', to: '/leadership' },
-      { label: 'Team & Treasury', to: '/treasuryteams' }, // Changed from Council
+      { label: 'Team & Treasury', to: '/treasuryteams' },
       { label: 'History & Foundation', to: '/history-foundation' },
     ],
   },
@@ -56,6 +59,7 @@ const navConfig = {
   },
   contact: { label: 'Contact', to: '/contact', dropdown: [] },
 };
+
 // Static pages for search
 const staticPages = [
   { label: 'Home', to: '/', category: 'Page', content: 'Welcome to Nepal National Ex-Army Association' },
@@ -80,6 +84,7 @@ const staticPages = [
 
 export function Navbar() {
   const { headerLogos } = useSite();
+  const { fontSize, increaseSize, decreaseSize, MIN_SIZE, MAX_SIZE } = useSize();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
@@ -88,8 +93,10 @@ export function Navbar() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [showSizeControls, setShowSizeControls] = useState(false);
   const searchRef = useRef(null);
   const inputRef = useRef(null);
+  const sizeControlRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -107,6 +114,9 @@ export function Navbar() {
         setSearchQuery('');
         setSearchResults([]);
         setSearchLoading(false);
+      }
+      if (sizeControlRef.current && !sizeControlRef.current.contains(event.target)) {
+        setShowSizeControls(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -128,9 +138,10 @@ export function Navbar() {
     setSearchQuery('');
     setSearchResults([]);
     setSearchLoading(false);
+    setShowSizeControls(false);
   }, [location.pathname]);
 
-  // Search functionality - searches all content
+  // Search functionality
   useEffect(() => {
     const performSearch = async () => {
       const query = searchQuery.trim();
@@ -138,7 +149,6 @@ export function Navbar() {
         setSearchLoading(true);
         
         try {
-          // Search in static pages
           const pageResults = staticPages.filter(item => {
             const labelMatch = item.label.toLowerCase().includes(query.toLowerCase());
             const contentMatch = item.content?.toLowerCase().includes(query.toLowerCase());
@@ -150,13 +160,10 @@ export function Navbar() {
             type: 'page'
           }));
 
-          // Search in dynamic content (API)
           const dynamicResults = await searchAllContent(query);
           
-          // Combine results
           let allResults = [...pageResults, ...dynamicResults];
           
-          // Remove duplicates
           const uniqueResults = [];
           const seen = new Set();
           allResults.forEach(item => {
@@ -167,21 +174,17 @@ export function Navbar() {
             }
           });
 
-          // Sort results - exact matches first
           uniqueResults.sort((a, b) => {
             const aTitle = a.title?.toLowerCase() || '';
             const bTitle = b.title?.toLowerCase() || '';
             const queryLower = query.toLowerCase();
             
-            // Exact match gets highest priority
             if (aTitle === queryLower && bTitle !== queryLower) return -1;
             if (bTitle === queryLower && aTitle !== queryLower) return 1;
             
-            // Starts with query gets next priority
             if (aTitle.startsWith(queryLower) && !bTitle.startsWith(queryLower)) return -1;
             if (bTitle.startsWith(queryLower) && !aTitle.startsWith(queryLower)) return 1;
             
-            // Contains query gets next
             if (aTitle.includes(queryLower) && !bTitle.includes(queryLower)) return -1;
             if (bTitle.includes(queryLower) && !aTitle.includes(queryLower)) return 1;
             
@@ -257,6 +260,7 @@ export function Navbar() {
   };
 
   const navItems = Object.entries(navConfig);
+  const sizePercentage = Math.round(fontSize * 100);
 
   return (
     <>
@@ -289,7 +293,7 @@ export function Navbar() {
               </div>
             </Link>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <div className="hidden md:block">
                 <span className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-full bg-white ring-2 ring-army/30 shadow-md">
                   <img
@@ -300,6 +304,7 @@ export function Navbar() {
                 </span>
               </div>
 
+              {/* Mobile Menu Toggle - Only visible on mobile */}
               <button
                 onClick={() => setOpen((v) => !v)}
                 className="lg:hidden grid h-11 w-11 place-items-center rounded-lg text-army hover:bg-army/10 transition-colors"
@@ -311,7 +316,7 @@ export function Navbar() {
           </Container>
         </div>
 
-        {/* Desktop Nav */}
+        {/* Desktop Nav - Search + Font Controls Here */}
         <nav className="hidden lg:block bg-army shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] relative overflow-visible">
           <Container className="flex items-center justify-between overflow-visible">
             <div className="flex items-center gap-1 overflow-visible no-scrollbar flex-1">
@@ -370,14 +375,118 @@ export function Navbar() {
               ))}
             </div>
 
-            {/* Search Button */}
-            <button
-              onClick={() => setSearchOpen(true)}
-              className="relative px-3 py-2.5 text-white/90 hover:text-white transition-colors flex-shrink-0 rounded-md hover:bg-white/10"
-              aria-label="Search"
-            >
-              <Search className="h-5 w-5" />
-            </button>
+            {/* Desktop Right Controls - Search (Left) + Font Size (Right) */}
+            <div className="flex items-center gap-2">
+              {/* Search Button - Left Side */}
+              <button
+                onClick={() => setSearchOpen(true)}
+                className="p-1.5 rounded-md text-white/70 hover:text-white hover:bg-white/10 transition-colors hover:scale-110 duration-200"
+                aria-label="Search"
+              >
+                <Search className="h-4 w-4" />
+              </button>
+
+              {/* Font Size Control - Right Side */}
+              <div className="relative" ref={sizeControlRef}>
+                <button
+                  onClick={() => setShowSizeControls(!showSizeControls)}
+                  className="p-1.5 rounded-md text-white/70 hover:text-white hover:bg-white/10 transition-colors hover:scale-110 duration-200"
+                  aria-label="Font size controls"
+                  title="Font Size"
+                >
+                  <Type className="h-4 w-4" />
+                </button>
+
+                {showSizeControls && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 p-3 z-[9999] min-w-[160px] backdrop-blur-sm bg-white/95"
+                  >
+                    <div className="flex items-center justify-between mb-2 pb-2 border-b border-gray-100">
+                      <span className="text-xs font-semibold text-gray-600">Font Size</span>
+                      <span className="text-xs font-bold text-gold">{sizePercentage}%</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <button
+                        onClick={decreaseSize}
+                        disabled={fontSize <= MIN_SIZE}
+                        className={`p-2 rounded-xl transition-all duration-200 ${
+                          fontSize <= MIN_SIZE 
+                            ? 'text-gray-300 cursor-not-allowed bg-gray-50' 
+                            : 'text-army hover:bg-gold/10 hover:text-gold hover:scale-110'
+                        }`}
+                      >
+                        <Minus className="h-4 w-4" />
+                      </button>
+                      <div className="flex-1 px-2">
+                        <div className="relative w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                          <motion.div 
+                            className="absolute top-0 left-0 h-full bg-gradient-to-r from-gold to-gold-dark rounded-full"
+                            style={{ 
+                              width: `${((fontSize - MIN_SIZE) / (MAX_SIZE - MIN_SIZE)) * 100}%`,
+                            }}
+                            initial={{ width: 0 }}
+                            animate={{ width: `${((fontSize - MIN_SIZE) / (MAX_SIZE - MIN_SIZE)) * 100}%` }}
+                            transition={{ duration: 0.3 }}
+                          />
+                        </div>
+                      </div>
+                      <button
+                        onClick={increaseSize}
+                        disabled={fontSize >= MAX_SIZE}
+                        className={`p-2 rounded-xl transition-all duration-200 ${
+                          fontSize >= MAX_SIZE 
+                            ? 'text-gray-300 cursor-not-allowed bg-gray-50' 
+                            : 'text-army hover:bg-gold/10 hover:text-gold hover:scale-110'
+                        }`}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </button>
+                    </div>
+                    <div className="flex gap-1 mt-2 pt-2 border-t border-gray-100">
+                      <button
+                        onClick={() => {
+                          // Reset to default (100%)
+                          const current = fontSize;
+                          if (current < 1) increaseSize();
+                          if (current > 1) decreaseSize();
+                          setShowSizeControls(false);
+                        }}
+                        className="flex-1 text-[10px] text-gray-400 hover:text-gold transition-colors py-1 px-2 rounded-lg hover:bg-gold/5"
+                      >
+                        Reset
+                      </button>
+                      <button
+                        onClick={() => {
+                          // Set to 100%
+                          const current = fontSize;
+                          if (current < 1) increaseSize();
+                          if (current > 1) decreaseSize();
+                          setShowSizeControls(false);
+                        }}
+                        className="flex-1 text-[10px] text-gray-400 hover:text-gold transition-colors py-1 px-2 rounded-lg hover:bg-gold/5"
+                      >
+                        Default
+                      </button>
+                      <button
+                        onClick={() => {
+                          for (let i = 0; i < 100; i++) {
+                            if (fontSize < MAX_SIZE) increaseSize();
+                          }
+                          setShowSizeControls(false);
+                        }}
+                        className="flex-1 text-[10px] text-gray-400 hover:text-gold transition-colors py-1 px-2 rounded-lg hover:bg-gold/5"
+                      >
+                        Large
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </div>
+            </div>
           </Container>
         </nav>
 
@@ -441,23 +550,60 @@ export function Navbar() {
                   );
                 })}
 
-                <button
-                  onClick={() => {
-                    setOpen(false);
-                    setSearchOpen(true);
-                  }}
-                  className="px-4 py-3 rounded-lg text-sm font-medium text-white hover:bg-white/10 transition-colors flex items-center gap-2"
-                >
-                  <Search className="h-5 w-5" />
-                  Search
-                </button>
+                {/* Mobile Search & Font Controls */}
+                <div className="px-4 py-3 border-b border-white/10">
+                  {/* Search */}
+                  <button
+                    onClick={() => {
+                      setOpen(false);
+                      setSearchOpen(true);
+                    }}
+                    className="w-full flex items-center gap-3 text-white/80 hover:text-white hover:bg-white/10 px-3 py-2 rounded-lg transition-colors"
+                  >
+                    <Search className="h-5 w-5" />
+                    <span className="text-sm font-medium">Search</span>
+                  </button>
+                  
+                  {/* Font Size Controls */}
+                  <div className="flex items-center gap-3 mt-2 px-3 py-2 rounded-lg hover:bg-white/5">
+                    <Type className="h-4 w-4 text-white/60" />
+                    <span className="text-sm text-white/60">Font Size</span>
+                    <div className="flex-1 flex items-center justify-end gap-2">
+                      <button
+                        onClick={decreaseSize}
+                        disabled={fontSize <= MIN_SIZE}
+                        className={`p-1 rounded-md transition-colors ${
+                          fontSize <= MIN_SIZE 
+                            ? 'text-gray-500 cursor-not-allowed' 
+                            : 'text-white/60 hover:text-white hover:bg-white/10'
+                        }`}
+                      >
+                        <Minus className="h-3 w-3" />
+                      </button>
+                      <span className="text-xs text-white/60 min-w-[35px] text-center">
+                        {sizePercentage}%
+                      </span>
+                      <button
+                        onClick={increaseSize}
+                        disabled={fontSize >= MAX_SIZE}
+                        className={`p-1 rounded-md transition-colors ${
+                          fontSize >= MAX_SIZE 
+                            ? 'text-gray-500 cursor-not-allowed' 
+                            : 'text-white/60 hover:text-white hover:bg-white/10'
+                        }`}
+                      >
+                        <Plus className="h-3 w-3" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </Container>
             </motion.div>
           )}
         </AnimatePresence>
       </motion.header>
 
-      {/* Search Modal with Real Content */}
+      {/* Search Modal */}
       <AnimatePresence>
         {searchOpen && (
           <motion.div
@@ -481,7 +627,6 @@ export function Navbar() {
               className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Search Input */}
               <form onSubmit={handleSearch} className="relative">
                 <div className="flex items-center p-4 border-b border-gray-100">
                   <Search className="h-5 w-5 text-gray-400 flex-shrink-0" />
@@ -517,7 +662,6 @@ export function Navbar() {
                 </div>
               </form>
 
-              {/* Search Results with Real Images */}
               {searchResults.length > 0 && (
                 <div className="max-h-96 overflow-y-auto p-2">
                   <div className="text-xs text-gray-400 px-3 py-2 font-medium uppercase tracking-wider flex items-center justify-between">
@@ -533,7 +677,6 @@ export function Navbar() {
                       onClick={() => handleResultClick(result)}
                       className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-green-50 transition-colors group border-l-2 border-transparent hover:border-green-500"
                     >
-                      {/* Image */}
                       <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
                         {result.image ? (
                           <img
@@ -551,8 +694,6 @@ export function Navbar() {
                           </div>
                         )}
                       </div>
-                      
-                      {/* Content */}
                       <div className="flex-1 text-left min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-sm font-medium text-gray-700 group-hover:text-green-700 transition-colors">
@@ -571,25 +712,20 @@ export function Navbar() {
                           </p>
                         )}
                       </div>
-                      
                       <ChevronRight className="h-4 w-4 text-gray-300 group-hover:text-green-500 transition-colors flex-shrink-0" />
                     </motion.button>
                   ))}
                 </div>
               )}
 
-              {/* No Results */}
               {searchQuery.trim().length > 0 && searchResults.length === 0 && !searchLoading && (
                 <div className="p-8 text-center">
                   <div className="text-4xl mb-3">🔍</div>
                   <p className="text-gray-500 font-medium">No results found</p>
-                  <p className="text-sm text-gray-400 mt-1">
-                    Try searching for different keywords
-                  </p>
+                  <p className="text-sm text-gray-400 mt-1">Try searching for different keywords</p>
                 </div>
               )}
 
-              {/* Loading State */}
               {searchLoading && (
                 <div className="p-8 text-center">
                   <Loader className="h-8 w-8 text-gold animate-spin mx-auto" />
@@ -597,18 +733,14 @@ export function Navbar() {
                 </div>
               )}
 
-              {/* Empty State */}
               {!searchQuery && !searchLoading && (
                 <div className="p-8 text-center">
                   <div className="text-4xl mb-3">🔎</div>
                   <p className="text-gray-400">Type to search the website</p>
-                  <p className="text-xs text-gray-300 mt-1">
-                    Search in News, Events, Notices, Gallery, and more
-                  </p>
+                  <p className="text-xs text-gray-300 mt-1">Search in News, Events, Notices, Gallery, and more</p>
                 </div>
               )}
 
-              {/* Quick Suggestions */}
               {!searchQuery && !searchLoading && (
                 <div className="px-4 pb-4">
                   <p className="text-xs text-gray-400 mb-2 font-medium">Try searching for:</p>
@@ -616,9 +748,7 @@ export function Navbar() {
                     {['News', 'Events', 'Gallery', 'Notices', 'Leadership', 'Training', 'Committee', 'Veterans'].map((suggestion) => (
                       <button
                         key={suggestion}
-                        onClick={() => {
-                          setSearchQuery(suggestion);
-                        }}
+                        onClick={() => setSearchQuery(suggestion)}
                         className="px-3 py-1.5 text-xs bg-gray-100 hover:bg-green-100 text-gray-600 hover:text-green-700 rounded-full transition-colors"
                       >
                         {suggestion}
