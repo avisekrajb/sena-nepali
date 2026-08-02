@@ -5,6 +5,7 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import { SiteProvider } from './context/SiteContext';
 import { ScrollProvider } from './context/ScrollContext';
+import { SizeProvider } from './context/SizeContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import ScrollToTop from './components/ScrollToTop';
 import MaintenanceModal from './components/MaintenanceModal';
@@ -247,39 +248,41 @@ function App() {
   return (
     <AuthProvider>
       <SiteProvider>
-        <ScrollProvider>
-          <BrowserRouter>
-            <AnimatedRoutes />
-            <RightClickProtection />
-            <NoticeModal />
-            <MaintenanceModal />
-            <NetworkStatus />
-            <Toaster 
-              position="top-right"
-              toastOptions={{
-                duration: 4000,
-                style: {
-                  background: '#363636',
-                  color: '#fff',
-                },
-                success: {
-                  duration: 3000,
-                  style: {
-                    background: '#1F3D2B',
-                    color: '#fff',
-                  },
-                },
-                error: {
+        <SizeProvider>
+          <ScrollProvider>
+            <BrowserRouter>
+              <AnimatedRoutes />
+              <RightClickProtection />
+              <NoticeModal />
+              <MaintenanceModal />
+              <NetworkStatus />
+              <Toaster 
+                position="top-right"
+                toastOptions={{
                   duration: 4000,
                   style: {
-                    background: '#8B2331',
+                    background: '#363636',
                     color: '#fff',
                   },
-                },
-              }}
-            />
-          </BrowserRouter>
-        </ScrollProvider>
+                  success: {
+                    duration: 3000,
+                    style: {
+                      background: '#1F3D2B',
+                      color: '#fff',
+                    },
+                  },
+                  error: {
+                    duration: 4000,
+                    style: {
+                      background: '#8B2331',
+                      color: '#fff',
+                    },
+                  },
+                }}
+              />
+            </BrowserRouter>
+          </ScrollProvider>
+        </SizeProvider>
       </SiteProvider>
     </AuthProvider>
   );
