@@ -19,8 +19,8 @@ const app = express();
 const corsOptions = {
   origin: [
     'http://localhost:4000',
-    'https://nepali-sena-complete-website.onrender.com/',
-    'https://nepali-sena-complete-backend.onrender.com/',
+    'https://sena-nepali-backend.onrender.com/',
+    'https://sena-nepali.onrender.com/',
     'http://127.0.0.1:4000',
     'http://localhost:3000',
     'http://127.0.0.1:3000',
