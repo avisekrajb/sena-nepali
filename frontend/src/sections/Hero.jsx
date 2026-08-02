@@ -449,7 +449,7 @@ export function Hero() {
                 initial="hidden"
                 animate="visible"
               >
-             <motion.h1
+            <motion.h1
   className="hero-title font-display font-bold text-green-900 text-4xl sm:text-5xl md:text-6xl lg:text-[4.25rem] leading-[1.35] tracking-tight"
   whileHover={{ scale: 1.02 }}
   transition={{ duration: 0.3 }}
@@ -457,7 +457,7 @@ export function Hero() {
   राष्ट्र सेवाबाट
   <br />
   <motion.span
-    className="text-gold inline-block mt-4" // Increased from mt-2 to mt-4
+    className="text-gold inline-block mt-1 sm:mt-2 lg:mt-4"
     whileHover={{ color: "#8B2331" }}
     transition={{ duration: 0.3 }}
   >
