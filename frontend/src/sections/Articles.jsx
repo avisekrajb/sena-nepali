@@ -58,7 +58,7 @@ export function Articles() {
       <Container>
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
-            <Eyebrow>Publications</Eyebrow>
+     
             <h1 className="font-display text-3xl md:text-4xl font-bold text-army mt-4">
               Articles
             </h1>
