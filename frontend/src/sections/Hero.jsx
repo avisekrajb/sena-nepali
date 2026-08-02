@@ -24,34 +24,33 @@ import { Container } from "../components/ui/Section";
 import { heroAPI, leadershipAPI, galleryAPI, contactAPI, contactMessageAPI } from "../services/api";
 import toast from "react-hot-toast";
 
-const iconMap = { Users, HeartHandshake, ShieldCheck };
-
 const FALLBACK_IMG = "https://placehold.co/600x600/1F3D2B/FFFFFF?text=Photo";
 
 const services = [
-  { icon: Target, title: "सामाजिक सेवा", desc: "समाजको सेवामा समर्पित" },
-  { icon: Award, title: "योगदान", desc: "राष्ट्र निर्माणमा योगदान" },
-  { icon: BookOpen, title: "प्रशिक्षण", desc: "आधुनिक क्षमता विकास" },
-  { icon: HeartHandshake, title: "सहयोग", desc: "सहयोग र एकता" },
+  { title: "Community Welfare", desc: "स्थानीय समुदायको कल्याणका लागि निरन्तर कार्यक्रम।" },
+  { title: "Veteran Support", desc: "भूपू सैनिक र आश्रित परिवारलाई प्रत्यक्ष सहयोग।" },
+  { title: "Medical Assistance", desc: "स्वास्थ्य शिविर र औषधोपचारमा आर्थिक सहायता।" },
+  { title: "Training Programs", desc: "सीप विकास र पुनःस्थापना तालिम।" },
+  { title: "Emergency Response", desc: "विपद्को समयमा द्रुत प्रतिकार्य समूह।" },
+  { title: "Blood Donation", desc: "नियमित रक्तदान अभियानको संचालन।" },
+  { title: "Disaster Relief", desc: "प्रकोप प्रभावितलाई राहत सामग्री वितरण।" },
+  { title: "Family Support", desc: "सहिद तथा अवकाशप्राप्त सैनिक परिवारलाई सहयोग।" },
 ];
 
 const pillars = [
   {
-    icon: Target,
     title: "Mission",
     text: "भूपू सैनिकहरूको एकता, कल्याण र समाज सेवामार्फत राष्ट्र निर्माणमा योगदान।",
   },
   {
-    icon: Eye,
     title: "Vision",
     text: "मर्यादित, आत्मनिर्भर र सामाजिक जिम्मेवारीयुक्त भूपू सैनिक समुदाय।",
   },
   {
-    icon: CheckCircle2,
     title: "Objectives",
     text: "कल्याण, सीप विकास, स्वास्थ्य सेवा, विपद् व्यवस्थापन र सामुदायिक कार्यक्रम।",
   },
-  { icon: Heart, title: "Core Values", text: "अनुशासन, इमानदारी, देशभक्ति, सेवा र आपसी सम्मान।" },
+  { title: "Core Values", text: "अनुशासन, इमानदारी, देशभक्ति, सेवा र आपसी सम्मान।" },
 ];
 
 const timeline = [
@@ -82,6 +81,14 @@ const staggerContainer = {
   visible: {
     opacity: 1,
     transition: { staggerChildren: 0.12, delayChildren: 0.2 }
+  }
+};
+
+const staggerServices = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.08, delayChildren: 0.1 }
   }
 };
 
@@ -142,7 +149,6 @@ export function Hero() {
 
   const personData = heroData.seniors?.length > 0 ? heroData.seniors : [];
 
-  // Carousel navigation
   const next = () => {
     if (isAnimating) return;
     setIsAnimating(true);
@@ -157,7 +163,6 @@ export function Hero() {
     setTimeout(() => setIsAnimating(false), 500);
   };
 
-  // Senior navigation - slide 2 at a time
   const nextSenior = () => {
     const totalSlides = Math.max(1, Math.ceil(personData.length / 2));
     setSeniorSlide((p) => (p + 1) % totalSlides);
@@ -173,7 +178,6 @@ export function Hero() {
     if (!isDragging && photos.length > 1) autoRef.current = setInterval(next, 4000);
   };
 
-  // Touch handlers for carousel
   const handleTouchStart = (e) => {
     const touch = e.touches[0];
     setStartX(touch.clientX);
@@ -198,7 +202,6 @@ export function Hero() {
     resetAuto();
   };
 
-  // Mouse drag handlers for desktop
   const handleMouseDown = (e) => {
     setStartX(e.clientX);
     setIsDragging(true);
@@ -221,7 +224,6 @@ export function Hero() {
     resetAuto();
   };
 
-  // Senior touch handlers
   const [seniorStartX, setSeniorStartX] = useState(0);
   const [seniorTranslate, setSeniorTranslate] = useState(0);
   const [isSeniorDragging, setIsSeniorDragging] = useState(false);
@@ -248,7 +250,6 @@ export function Hero() {
     setSeniorTranslate(0);
   };
 
-  // Senior mouse drag handlers
   const handleSeniorMouseDown = (e) => {
     setSeniorStartX(e.clientX);
     setIsSeniorDragging(true);
@@ -276,7 +277,6 @@ export function Hero() {
     };
   }, [isDragging, photos.length]);
 
-  // GSAP animations for initial load
   useEffect(() => {
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
@@ -317,7 +317,6 @@ export function Hero() {
   const displayedGallery = galleryItems.slice(0, initialDisplay);
   const hasMoreGallery = galleryItems.length > initialDisplay;
 
-  // Get seniors for current slide - show 2 at a time
   const getVisibleSeniors = () => {
     const start = seniorSlide * 2;
     return personData.slice(start, start + 2);
@@ -450,22 +449,21 @@ export function Hero() {
                 initial="hidden"
                 animate="visible"
               >
-                <motion.h1 
-                  className="hero-title font-display font-bold text-green-900 text-4xl sm:text-5xl md:text-6xl lg:text-[4.25rem] leading-[1.1] tracking-tight"
-                  whileHover={{ scale: 1.02 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  राष्ट्र सेवाबाट
-                  <br />
-                  <motion.span 
-                    className="text-gold"
-                    whileHover={{ color: "#8B2331" }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    समाज सेवातर्फ
-                  </motion.span>
-                </motion.h1>
-
+             <motion.h1
+  className="hero-title font-display font-bold text-green-900 text-4xl sm:text-5xl md:text-6xl lg:text-[4.25rem] leading-[1.35] tracking-tight"
+  whileHover={{ scale: 1.02 }}
+  transition={{ duration: 0.3 }}
+>
+  राष्ट्र सेवाबाट
+  <br />
+  <motion.span
+    className="text-gold inline-block mt-4" // Increased from mt-2 to mt-4
+    whileHover={{ color: "#8B2331" }}
+    transition={{ duration: 0.3 }}
+  >
+    समाज सेवातर्फ
+  </motion.span>
+</motion.h1>
                 <motion.p 
                   className="hero-sub mt-6 max-w-2xl text-base sm:text-lg md:text-xl text-gray-700 leading-relaxed"
                   variants={fadeInUp}
@@ -473,7 +471,7 @@ export function Hero() {
                   नेपालका भूपू सैनिकहरूको एकता, सम्मान, सेवा र राष्ट्र निर्माणप्रतिको निरन्तर प्रतिबद्धता।
                 </motion.p>
 
-                {/* Seniors Slider - 2 at a time with proper sliding */}
+                {/* Seniors Slider */}
                 {personData.length > 0 && (
                   <div className="mt-8 relative">
                     <div 
@@ -487,7 +485,7 @@ export function Hero() {
                       onMouseLeave={handleSeniorMouseUp}
                     >
                       <div 
-                        className="grid grid-cols-2 gap-3 transition-all duration-500 ease-in-out"
+                        className="grid grid-cols-2 gap-4 transition-all duration-500 ease-in-out"
                       >
                         {visibleSeniors.map((p, i) => (
                           <motion.div 
@@ -496,7 +494,7 @@ export function Hero() {
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 0.4, delay: i * 0.1 }}
                             whileHover={{ scale: 1.05, y: -5 }}
-                            className="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl p-3 hover:bg-gray-50 transition-all group shadow-sm hover:shadow-md"
+                            className="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl p-4 hover:bg-gray-50 transition-all group shadow-sm hover:shadow-md"
                           >
                             <div className="flex flex-col items-center">
                               <div className="w-full aspect-square rounded-lg overflow-hidden bg-gold/10 border-2 border-gold/30 group-hover:border-gold/60 transition-all group-hover:scale-105">
@@ -507,25 +505,24 @@ export function Hero() {
                                   onError={(e) => { e.target.style.display = "none"; }}
                                 />
                               </div>
-                              <h4 className="mt-2 font-semibold text-sm text-blue-600 group-hover:text-blue-700 transition-colors text-center">
+                              <h4 className="mt-3 font-bold text-base text-army group-hover:text-army transition-colors text-center">
                                 {p.name}
                               </h4>
-                              <p className="text-gray-500 text-xs font-medium text-center">{p.role}</p>
+                              <p className="text-gray-600 text-sm font-medium text-center">{p.role}</p>
                             </div>
                           </motion.div>
                         ))}
                       </div>
                     </div>
 
-                    {/* Navigation Dots - only if more than 2 seniors */}
                     {personData.length > 2 && (
-                      <div className="flex justify-center gap-1.5 mt-3">
+                      <div className="flex justify-center gap-1.5 mt-4">
                         {Array.from({ length: totalSeniorSlides }).map((_, i) => (
                           <button
                             key={i}
                             onClick={() => setSeniorSlide(i)}
-                            className={`w-1.5 h-1.5 rounded-full transition-all ${
-                              seniorSlide === i ? "bg-gold w-4" : "bg-gray-300 hover:bg-gray-500"
+                            className={`w-2 h-2 rounded-full transition-all ${
+                              seniorSlide === i ? "bg-gold w-6" : "bg-gray-300 hover:bg-gray-500"
                             }`}
                           />
                         ))}
@@ -538,7 +535,7 @@ export function Hero() {
           </Container>
         </div>
 
-        {/* Features */}
+        {/* Features - Green Border */}
         <motion.div 
           className="relative pb-6"
           variants={staggerContainer}
@@ -547,170 +544,166 @@ export function Hero() {
         >
           <Container>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[
-                { icon: "Users", title: "Unity & Brotherhood", desc: "Join a community of veterans committed to national unity and social harmony." },
-                { icon: "HeartHandshake", title: "Social Service", desc: "Dedicated to serving society through various welfare programs and initiatives." },
-                { icon: "ShieldCheck", title: "National Pride", desc: "Continuing our service to the nation with honor, dignity, and commitment." },
-              ].map((f) => {
-                const Icon = iconMap[f.icon];
-                return (
-                  <motion.div 
-                    key={f.title} 
-                    variants={fadeInUp}
-                    whileHover={{ y: -8, scale: 1.02, boxShadow: "0 20px 40px -12px rgba(0,0,0,0.2)" }}
-                    className="hero-badge rounded-2xl bg-white/95 backdrop-blur border border-gray-200 p-5 shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:border-gold/40 transition-all"
-                  >
-                    <div className="grid h-11 w-11 place-items-center rounded-xl bg-army/10 text-army">
-                      <Icon className="h-5 w-5" strokeWidth={2} />
-                    </div>
-                    <h3 className="mt-4 text-base font-semibold text-gray-900">{f.title}</h3>
-                    <p className="mt-1.5 text-sm text-gray-600 leading-relaxed">{f.desc}</p>
-                  </motion.div>
-                );
-              })}
+              <motion.div 
+                variants={fadeInUp}
+                whileHover={{ y: -4, boxShadow: "0 10px 30px -10px rgba(0,0,0,0.1)" }}
+                className="border-2 border-green-700/20 rounded-2xl p-6 hover:border-green-700/50 transition-all bg-white/50 backdrop-blur-sm"
+              >
+                <h3 className="text-lg font-semibold text-army">Unity & Brotherhood</h3>
+                <p className="text-sm text-gray-600 mt-2 leading-relaxed">Join a community of veterans committed to national unity and social harmony.</p>
+              </motion.div>
+              <motion.div 
+                variants={fadeInUp}
+                whileHover={{ y: -4, boxShadow: "0 10px 30px -10px rgba(0,0,0,0.1)" }}
+                className="border-2 border-green-700/20 rounded-2xl p-6 hover:border-green-700/50 transition-all bg-white/50 backdrop-blur-sm"
+              >
+                <h3 className="text-lg font-semibold text-army">Social Service</h3>
+                <p className="text-sm text-gray-600 mt-2 leading-relaxed">Dedicated to serving society through various welfare programs and initiatives.</p>
+              </motion.div>
+              <motion.div 
+                variants={fadeInUp}
+                whileHover={{ y: -4, boxShadow: "0 10px 30px -10px rgba(0,0,0,0.1)" }}
+                className="border-2 border-green-700/20 rounded-2xl p-6 hover:border-green-700/50 transition-all bg-white/50 backdrop-blur-sm"
+              >
+                <h3 className="text-lg font-semibold text-army">National Pride</h3>
+                <p className="text-sm text-gray-600 mt-2 leading-relaxed">Continuing our service to the nation with honor, dignity, and commitment.</p>
+              </motion.div>
             </div>
           </Container>
         </motion.div>
       </div>
 
-      {/* About Section */}
-      <motion.section 
-        className="about-section py-16 pt-8 bg-white border-t border-gray-100"
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.2 }}
-        variants={fadeInUp}
-      >
-        <Container>
-          <div className="grid lg:grid-cols-[1.05fr_1fr] gap-8 lg:gap-12 items-start">
-            <motion.div variants={fadeInUp}>
-              <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-gold-dark mb-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-gold" />
-                About the Association
-              </div>
-              <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-army leading-[1.2]">
-                भूपू सैनिकहरूको साझा मञ्च — <br />
-                <span className="text-gold">सम्मान र सेवाको निरन्तरता</span>
-              </h2>
-              <div className="mt-4 space-y-4 text-gray-600 leading-relaxed">
-                <p className="text-base md:text-lg">
-                  नेपाल भूपू सैनिक संघ अवकाशप्राप्त नेपाली सैनिकहरूको एक स्वयंसेवी सामाजिक संस्था हो। 
-                  लामो सैन्य सेवापछि पनि राष्ट्र र समाजप्रतिको जिम्मेवारीलाई निरन्तरता दिँदै यो 
-                  संस्थाले एकजुट भूपू सैनिक परिवारको निर्माण गरेको छ।
-                </p>
-                <p className="text-base md:text-lg">
-                  कल्याण, स्वास्थ्य सहयोग, सीप विकास, विपद् प्रतिकार्य, रक्तदान अभियान र सामुदायिक 
-                  विकासजस्ता क्षेत्रमा संस्था सक्रिय रहँदै आएको छ। अवकाशप्राप्त सैनिक तथा उनका 
-                  परिवारको जीवनयापन मर्यादित बनाउनु र देशको सामाजिक ताँदो थप बलियो बनाउनु हाम्रो 
-                  प्राथमिकता हो।
-                </p>
-              </div>
+      {/* About Section - No Dot, No Icons */}
+    {/* About Section - No Dot, No Icons */}
+<motion.section 
+  className="about-section py-20 pt-10 bg-white border-t border-gray-100"
+  initial="hidden"
+  whileInView="visible"
+  viewport={{ once: true, amount: 0.2 }}
+  variants={fadeInUp}
+>
+  <Container>
+    <div className="grid lg:grid-cols-[1.05fr_1fr] gap-8 lg:gap-12 items-start">
+      <motion.div variants={fadeInUp}>
+        {/* Added "About the Association" heading */}
+        <div className="text-lg md:text-xl font-semibold uppercase tracking-[0.14em] text-green-600 mb-3">
+          About the Association
+        </div>
+        <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-army leading-[1.35]">
+          भूपू सैनिकहरूको साझा मञ्च
+          <br />
+          <span className="text-gold inline-block mt-2">
+            सम्मान र सेवाको निरन्तरता
+          </span>
+        </h2>
+        <div className="mt-6 space-y-5 text-gray-600 leading-relaxed">
+          <p className="text-lg md:text-xl text-justify">
+            नेपाल भूपू सैनिक संघ अवकाशप्राप्त नेपाली सैनिकहरूको एक स्वयंसेवी सामाजिक संस्था हो। 
+            लामो सैन्य सेवापछि पनि राष्ट्र र समाजप्रतिको जिम्मेवारीलाई निरन्तरता दिँदै यो 
+            संस्थाले एकजुट भूपू सैनिक परिवारको निर्माण गरेको छ।
+          </p>
+          <p className="text-lg md:text-xl text-justify">
+            कल्याण, स्वास्थ्य सहयोग, सीप विकास, विपद् प्रतिकार्य, रक्तदान अभियान र सामुदायिक 
+            विकासजस्ता क्षेत्रमा संस्था सक्रिय रहँदै आएको छ। अवकाशप्राप्त सैनिक तथा उनका 
+            परिवारको जीवनयापन मर्यादित बनाउनु र देशको सामाजिक ताँदो थप बलियो बनाउनु हाम्रो 
+            प्राथमिकता हो।
+          </p>
+        </div>
 
-              <div className="mt-6 grid sm:grid-cols-2 gap-3">
-                {pillars.map((p, i) => {
-                  const Icon = p.icon;
-                  return (
-                    <motion.div
-                      key={p.title}
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.5, delay: i * 0.08 }}
-                      whileHover={{ y: -6, boxShadow: "0 10px 30px -10px rgba(0,0,0,0.15)" }}
-                      className="bg-white/80 border border-gray-200 p-4 rounded-xl hover:border-gold/40 transition-all shadow-sm hover:shadow-md"
-                    >
-                      <div className="grid h-8 w-8 place-items-center rounded-lg bg-gold/10 text-gold">
-                        <Icon className="h-4 w-4" />
-                      </div>
-                      <h3 className="mt-2 text-sm font-semibold text-army">{p.title}</h3>
-                      <p className="mt-0.5 text-xs text-gray-600 leading-relaxed">{p.text}</p>
-                    </motion.div>
-                  );
-                })}
-              </div>
+        {/* Pillars - No Icons */}
+        <div className="mt-8 grid sm:grid-cols-2 gap-4">
+          {pillars.map((p, i) => (
+            <motion.div
+              key={p.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.08 }}
+              whileHover={{ y: -6, boxShadow: "0 10px 30px -10px rgba(0,0,0,0.15)" }}
+              className="bg-white/80 border border-gray-200 p-5 rounded-xl hover:border-gold/40 transition-all shadow-sm hover:shadow-md"
+            >
+              <h3 className="text-base font-semibold text-army">{p.title}</h3>
+              <p className="mt-1 text-sm text-gray-600 leading-relaxed">{p.text}</p>
             </motion.div>
+          ))}
+        </div>
+      </motion.div>
 
-            <div className="relative">
-              <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-gold-dark mb-4">
-                <span className="h-1.5 w-1.5 rounded-full bg-gold" />
-                Our Journey
+      <div className="relative">
+        <div className="text-lg md:text-xl font-semibold uppercase tracking-[0.14em] text-green-600 mb-4">
+          Our Journey
+        </div>
+        <div className="relative pl-7 border-l-2 border-green-500/40">
+          {timeline.map((t, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.1 }}
+              whileHover={{ x: 8 }}
+              className="relative pb-6 last:pb-0"
+            >
+              <span className="absolute -left-[33px] top-1 grid h-4 w-4 place-items-center rounded-full bg-white border-2 border-green-500">
+                <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+              </span>
+              <div className="text-xs font-semibold uppercase tracking-widest text-green-600">
+                {t.year}
               </div>
-              <div className="relative pl-7 border-l-2 border-gold/30">
-                {timeline.map((t, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: i * 0.1 }}
-                    whileHover={{ x: 8 }}
-                    className="relative pb-6 last:pb-0"
-                  >
-                    <span className="absolute -left-[33px] top-1 grid h-4 w-4 place-items-center rounded-full bg-white border-2 border-gold">
-                      <span className="h-1.5 w-1.5 rounded-full bg-gold" />
-                    </span>
-                    <div className="text-[10px] font-semibold uppercase tracking-widest text-gold">
-                      {t.year}
-                    </div>
-                    <h3 className="mt-0.5 text-sm font-semibold text-army">{t.title}</h3>
-                    <p className="mt-0.5 text-xs text-gray-600 leading-relaxed">{t.desc}</p>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </Container>
-      </motion.section>
+              <h3 className="mt-1 text-base font-semibold text-army">{t.title}</h3>
+              <p className="mt-1 text-sm text-gray-600 leading-relaxed">{t.desc}</p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </Container>
+</motion.section>
 
-      {/* Services Section */}
-      <motion.section 
-        className="py-16 bg-gray-50"
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.2 }}
-        variants={staggerContainer}
-      >
-        <Container>
-          <div className="text-center mb-8">
-            <h2 className="font-display text-2xl md:text-3xl font-bold text-army mt-2">सेवाका क्षेत्रहरू</h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {services.map((service, index) => {
-              const Icon = service.icon;
-              return (
-                <motion.div 
-                  key={index} 
-                  variants={fadeInUp}
-                  whileHover={{ y: -10, scale: 1.03, boxShadow: "0 20px 40px -12px rgba(0,0,0,0.2)" }}
-                  className="service-card bg-white p-5 rounded-xl shadow-md hover:shadow-xl transition-all border border-gray-100 text-center"
-                >
-                  <div className="w-12 h-12 bg-gold/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Icon className="h-6 w-6 text-gold" />
-                  </div>
-                  <h3 className="font-semibold text-army text-sm">{service.title}</h3>
-                  <p className="text-gray-500 text-xs mt-1">{service.desc}</p>
-                </motion.div>
-              );
-            })}
-          </div>
-        </Container>
-      </motion.section>
+      {/* Services Section - 8 Cards with Framer Motion */}
+     {/* Services Section - 8 Cards with Green Border */}
+<motion.section 
+  className="py-20 bg-gray-50"
+  initial="hidden"
+  whileInView="visible"
+  viewport={{ once: true, amount: 0.1 }}
+  variants={staggerServices}
+>
+  <Container>
+    <motion.div className="text-center mb-12" variants={fadeInUp}>
+      <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-army mt-2">सेवाका क्षेत्रहरू</h2>
+    </motion.div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      {services.map((service, index) => (
+        <motion.div 
+          key={index} 
+          variants={fadeInUp}
+          whileHover={{ y: -10, scale: 1.03, boxShadow: "0 20px 40px -12px rgba(0,0,0,0.2)" }}
+          className="service-card bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition-all border-2 border-green-700/20 hover:border-green-700/50 text-center"
+        >
+          <h3 className="font-semibold text-army text-base md:text-lg">{service.title}</h3>
+          <p className="text-gray-600 text-sm md:text-base mt-2 leading-relaxed">{service.desc}</p>
+        </motion.div>
+      ))}
+    </div>
+  </Container>
+</motion.section>
 
       {/* Leadership Section */}
       <motion.section 
-        className="py-16 bg-white"
+        className="py-20 bg-white"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.2 }}
         variants={staggerContainer}
       >
         <Container>
-          <div className="text-center mb-8">
-            <h2 className="font-display text-2xl md:text-3xl font-bold text-army mt-2">केन्द्रीय सञ्चालन समिति</h2>
-            <p className="text-gray-500 text-sm mt-1">नेपाल राष्ट्रिय भूतपूर्व सैनिक संघको नेतृत्व टोली</p>
-          </div>
+          <motion.div className="text-center mb-10" variants={fadeInUp}>
+            <h2 className="font-display text-3xl md:text-4xl font-bold text-army mt-2">केन्द्रीय सञ्चालन समिति</h2>
+            <p className="text-gray-600 text-base mt-2">नेपाल राष्ट्रिय भूतपूर्व सैनिक संघको नेतृत्व टोली</p>
+          </motion.div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {displayedLeadership.map((member) => (
               <motion.div 
                 key={member._id} 
@@ -725,10 +718,10 @@ export function Hero() {
                     className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                   />
                 </div>
-                <div className="p-2 text-center">
-                  <h3 className="font-semibold text-army text-xs truncate">{member.name}</h3>
-                  <p className="text-[10px] text-gold-dark font-medium truncate">{member.role}</p>
-                  {member.bio && <p className="text-[10px] text-gray-500 mt-0.5 line-clamp-1">{member.bio}</p>}
+                <div className="p-3 text-center">
+                  <h3 className="font-semibold text-army text-sm truncate">{member.name}</h3>
+                  <p className="text-xs text-gold-dark font-medium truncate">{member.role}</p>
+                  {member.bio && <p className="text-xs text-gray-500 mt-1 line-clamp-2">{member.bio}</p>}
                 </div>
               </motion.div>
             ))}
@@ -751,19 +744,19 @@ export function Hero() {
 
       {/* Gallery Section */}
       <motion.section 
-        className="py-16 bg-gray-50"
+        className="py-20 bg-gray-50"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.2 }}
         variants={staggerContainer}
       >
         <Container>
-          <div className="text-center mb-8">
-            <h2 className="font-display text-2xl md:text-3xl font-bold text-army mt-2">तस्बिर संग्रह</h2>
-            <p className="text-gray-500 text-sm mt-1">विभिन्न कार्यक्रम, बैठक र सामुदायिक सेवाका दृश्यहरू।</p>
-          </div>
+          <motion.div className="text-center mb-10" variants={fadeInUp}>
+            <h2 className="font-display text-3xl md:text-4xl font-bold text-army mt-2">तस्बिर संग्रह</h2>
+            <p className="text-gray-600 text-base mt-2">विभिन्न कार्यक्रम, बैठक र सामुदायिक सेवाका दृश्यहरू।</p>
+          </motion.div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {displayedGallery.map((item) => (
               <motion.div 
                 key={item._id} 
@@ -797,9 +790,9 @@ export function Hero() {
         </Container>
       </motion.section>
 
-      {/* Contact Section */}
+      {/* Contact Section - Green Background */}
       <motion.section 
-        className="contact-section py-16 bg-white"
+        className="contact-section py-16 bg-green-50"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.2 }}
@@ -807,26 +800,26 @@ export function Hero() {
       >
         <Container>
           <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-8">
-              <h2 className="font-display text-2xl md:text-3xl font-bold text-army mt-2">सम्पर्क गर्नुहोस्</h2>
-            </div>
+            <motion.div className="text-center mb-8" variants={fadeInUp}>
+              <h2 className="font-display text-3xl md:text-4xl font-bold text-army mt-2">सम्पर्क गर्नुहोस्</h2>
+            </motion.div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                  <div className="bg-gold/10 p-2 rounded-lg"><MapPin className="h-4 w-4 text-gold" /></div>
-                  <div><h4 className="font-medium text-army text-sm">Address</h4><p className="text-gray-600 text-xs">{contact?.address || 'Kathmandu, Nepal'}</p></div>
-                </div>
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                  <div className="bg-gold/10 p-2 rounded-lg"><Phone className="h-4 w-4 text-gold" /></div>
-                  <div><h4 className="font-medium text-army text-sm">Phone</h4><p className="text-gray-600 text-xs">{contact?.phone || '+977-1-1234567'}</p></div>
-                </div>
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                  <div className="bg-gold/10 p-2 rounded-lg"><Mail className="h-4 w-4 text-gold" /></div>
-                  <div><h4 className="font-medium text-army text-sm">Email</h4><p className="text-gray-600 text-xs">{contact?.email || 'info@nepalarmy.org'}</p></div>
-                </div>
+              <motion.div className="space-y-3" variants={staggerContainer}>
+                <motion.div variants={fadeInUp} className="flex items-center gap-3 p-4 bg-white/80 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                  <div className="bg-gold/10 p-2 rounded-lg"><MapPin className="h-5 w-5 text-gold" /></div>
+                  <div><h4 className="font-medium text-army text-sm">Address</h4><p className="text-gray-600 text-sm">{contact?.address || 'Kathmandu, Nepal'}</p></div>
+                </motion.div>
+                <motion.div variants={fadeInUp} className="flex items-center gap-3 p-4 bg-white/80 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                  <div className="bg-gold/10 p-2 rounded-lg"><Phone className="h-5 w-5 text-gold" /></div>
+                  <div><h4 className="font-medium text-army text-sm">Phone</h4><p className="text-gray-600 text-sm">{contact?.phone || '+977-1-1234567'}</p></div>
+                </motion.div>
+                <motion.div variants={fadeInUp} className="flex items-center gap-3 p-4 bg-white/80 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                  <div className="bg-gold/10 p-2 rounded-lg"><Mail className="h-5 w-5 text-gold" /></div>
+                  <div><h4 className="font-medium text-army text-sm">Email</h4><p className="text-gray-600 text-sm">{contact?.email || 'info@nepalarmy.org'}</p></div>
+                </motion.div>
 
-                <div className="rounded-xl overflow-hidden shadow-md border border-gray-200 h-48">
+                <motion.div variants={fadeInUp} className="rounded-xl overflow-hidden shadow-md border border-gray-200 h-48">
                   <iframe
                     src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d28266.030921880483!2d85.2854008!3d27.7034568!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb198a0b7caa7b%3A0x9a0ccb4aa8c28258!2sKathmandu%2044600!5e0!3m2!1sen!2snp!4v1700000000000!5m2!1sen!2snp"
                     width="100%"
@@ -837,18 +830,21 @@ export function Hero() {
                     title="Location Map"
                     className="w-full h-full"
                   />
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
 
-              <div className="bg-gray-50 p-5 rounded-xl">
-                <form onSubmit={handleSubmit} className="space-y-3">
+              <motion.div 
+                className="bg-white/90 p-6 rounded-xl shadow-md"
+                variants={fadeInUp}
+              >
+                <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
                     <input 
                       type="text" 
                       value={formData.name} 
                       onChange={(e) => setFormData({...formData, name: e.target.value})} 
                       placeholder="Your Name" 
-                      className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent text-sm" 
+                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent text-sm" 
                       required 
                     />
                   </div>
@@ -858,7 +854,7 @@ export function Hero() {
                       value={formData.email} 
                       onChange={(e) => setFormData({...formData, email: e.target.value})} 
                       placeholder="Your Email" 
-                      className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent text-sm" 
+                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent text-sm" 
                       required 
                     />
                   </div>
@@ -866,16 +862,18 @@ export function Hero() {
                     <textarea 
                       value={formData.message} 
                       onChange={(e) => setFormData({...formData, message: e.target.value})} 
-                      rows="3" 
+                      rows="4" 
                       placeholder="Your Message" 
-                      className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent text-sm" 
+                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent text-sm" 
                       required 
                     />
                   </div>
-                  <button 
+                  <motion.button 
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     type="submit" 
                     disabled={sending}
-                    className="w-full bg-gold text-white py-2 rounded-lg hover:bg-gold-dark transition-colors flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+                    className="w-full bg-gold text-white py-3 rounded-lg hover:bg-gold-dark transition-colors flex items-center justify-center gap-2 text-sm font-medium disabled:opacity-50"
                   >
                     {sending ? (
                       <>
@@ -887,14 +885,18 @@ export function Hero() {
                         <Send className="h-4 w-4" /> Send Message
                       </>
                     )}
-                  </button>
+                  </motion.button>
                   {submitted && (
-                    <p className="text-green-600 text-xs text-center">
+                    <motion.p 
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-green-600 text-sm text-center font-medium"
+                    >
                       ✅ Message sent successfully!
-                    </p>
+                    </motion.p>
                   )}
                 </form>
-              </div>
+              </motion.div>
             </div>
           </div>
         </Container>
@@ -903,4 +905,4 @@ export function Hero() {
   );
 }
 
-export default Hero;  
+export default Hero;
