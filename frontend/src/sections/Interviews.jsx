@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Eyebrow } from '../components/ui/Section';
+import { Container } from '../components/ui/Section';
 import { interviewAPI } from '../services/api';
-import { Mic, Calendar, User, Video, Image, Play, X, ExternalLink, Eye, CalendarDays, Link2 } from 'lucide-react';
+import { 
+  Mic, Calendar, User, Video, Image, Play, X, ExternalLink, Eye, 
+  CalendarDays, Link2, ChevronDown, ChevronUp, Users 
+} from 'lucide-react';
 
 const FALLBACK_IMAGE = 'https://placehold.co/600x400/1F3D2B/FFFFFF?text=Interview';
 
 export function Interviews() {
   const [interviews, setInterviews] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedInterview, setSelectedInterview] = useState(null);
   const [activeFilter, setActiveFilter] = useState('all');
+  const [expandedId, setExpandedId] = useState(null);
 
   useEffect(() => {
     loadInterviews();
@@ -78,6 +81,10 @@ export function Interviews() {
     }
   };
 
+  const toggleExpand = (id) => {
+    setExpandedId(expandedId === id ? null : id);
+  };
+
   // Get unique years for filter
   const years = [...new Set(interviews.map(item => getYear(item.date)))].filter(y => y !== 'N/A').sort((a, b) => b - a);
 
@@ -98,7 +105,6 @@ export function Interviews() {
       <Container>
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-           
             <h1 className="font-display text-3xl md:text-4xl font-bold text-army mt-4">
               Interviews
             </h1>
@@ -136,97 +142,185 @@ export function Interviews() {
             </div>
           )}
 
-          {/* 4 per row grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {filteredInterviews.map((interview) => (
-              <div
-                key={interview._id}
-                className="bg-white rounded-xl shadow-sm hover:shadow-xl transition-all border border-gray-100 overflow-hidden group cursor-pointer"
-                onClick={() => setSelectedInterview(interview)}
-              >
-                {/* Thumbnail */}
-                <div className="relative h-40 overflow-hidden bg-gray-100">
-                  <img
-                    src={getThumbnail(interview)}
-                    alt={interview.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    onError={(e) => {
-                      e.target.src = FALLBACK_IMAGE;
-                    }}
-                  />
-                  
-                  {/* Type Badge - Mini */}
-                  <span className={`absolute top-2 right-2 text-[10px] px-2 py-0.5 rounded-full text-white ${
-                    interview.type === 'video' ? 'bg-red-500' : 'bg-blue-500'
-                  }`}>
-                    {interview.type === 'video' ? 'Video' : 'Photo'}
-                  </span>
+          {/* Interview Cards - Expandable */}
+          <div className="space-y-4">
+            {filteredInterviews.map((interview) => {
+              const isExpanded = expandedId === interview._id;
+              const hasImageValue = hasImage(interview);
+              const videoId = interview.type === 'video' ? extractYouTubeId(interview.videoUrl) : null;
 
-                  {/* Year Badge - Top Left */}
-                  <span className="absolute top-2 left-2 text-[10px] px-2 py-0.5 rounded-full bg-black/60 text-white backdrop-blur-sm flex items-center gap-1">
-                    <CalendarDays className="h-3 w-3" />
-                    {getYear(interview.date)}
-                  </span>
+              return (
+                <div
+                  key={interview._id}
+                  className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all border border-gray-100 overflow-hidden"
+                >
+                  {/* Card Header - Always visible */}
+                  <div 
+                    className="flex items-start gap-4 p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                    onClick={() => toggleExpand(interview._id)}
+                  >
+                    {/* Thumbnail */}
+                    <div className="relative flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden bg-gray-100">
+                      {hasImageValue ? (
+                        <img
+                          src={interview.image}
+                          alt={interview.title}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.src = FALLBACK_IMAGE;
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                          <User className="h-8 w-8 text-gray-400" />
+                        </div>
+                      )}
+                      
+                      {/* Type Badge */}
+                      <span className={`absolute top-1 right-1 text-[8px] px-1.5 py-0.5 rounded-full text-white ${
+                        interview.type === 'video' ? 'bg-red-500' : 'bg-blue-500'
+                      }`}>
+                        {interview.type === 'video' ? 'Video' : 'Photo'}
+                      </span>
 
-                  {/* Play icon overlay for videos */}
-                  {interview.type === 'video' && (
-                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
-                        <Play className="h-6 w-6 text-gold ml-1" />
+                      {/* Play icon overlay for videos */}
+                      {interview.type === 'video' && (
+                        <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                          <div className="w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
+                            <Play className="h-4 w-4 text-gold ml-0.5" />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <h3 className="font-semibold text-army text-base line-clamp-1 group-hover:text-gold transition-colors">
+                            {interview.title}
+                          </h3>
+                          <div className="flex flex-wrap items-center gap-2 mt-1">
+                            <span className="flex items-center gap-1 text-xs text-gray-600">
+                              <User className="h-3 w-3 text-gold" />
+                              {interview.guest}
+                            </span>
+                            {interview.team && (
+                              <span className="text-xs text-gray-400">| {interview.team}</span>
+                            )}
+                            <span className="text-xs text-gray-400">|</span>
+                            <span className="flex items-center gap-1 text-xs text-gray-400">
+                              <Calendar className="h-3 w-3" />
+                              {formatDate(interview.date)}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {interview.type === 'video' && interview.videoUrl && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openVideo(interview.videoUrl);
+                              }}
+                              className="flex items-center gap-1 text-xs bg-red-50 text-red-600 hover:bg-red-600 hover:text-white px-2 py-1 rounded transition-colors"
+                            >
+                              <Play className="h-3 w-3" />
+                              Watch
+                            </button>
+                          )}
+                          <button className="text-gray-400 hover:text-gold transition-colors p-1">
+                            {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Expanded Content */}
+                  {isExpanded && (
+                    <div className="border-t border-gray-100 p-4 bg-gray-50/50">
+                      <div className="space-y-4">
+                        {/* Full Image/Video Display */}
+                        {interview.type === 'video' && interview.videoUrl && videoId ? (
+                          <div className="aspect-video bg-gray-900 rounded-lg overflow-hidden">
+                            <iframe
+                              src={`https://www.youtube.com/embed/${videoId}`}
+                              className="w-full h-full"
+                              allowFullScreen
+                              title={interview.title}
+                              frameBorder="0"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            />
+                          </div>
+                        ) : hasImageValue ? (
+                          <div className="w-full max-h-96 overflow-hidden rounded-lg">
+                            <img
+                              src={interview.image}
+                              alt={interview.title}
+                              className="w-full h-full object-contain max-h-96"
+                              onError={(e) => {
+                                e.target.src = FALLBACK_IMAGE;
+                              }}
+                            />
+                          </div>
+                        ) : null}
+
+                        {/* Full Content */}
+                        <div className="prose max-w-none">
+                          <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                            {interview.content}
+                          </p>
+                        </div>
+
+                        {/* Video Link */}
+                        {interview.type === 'video' && interview.videoUrl && (
+                          <div className="p-3 bg-white rounded-lg border border-gray-200">
+                            <p className="text-xs text-gray-500 flex items-center gap-2">
+                              <Link2 className="h-3 w-3" />
+                              Video Link: 
+                              <a 
+                                href={interview.videoUrl} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-gold hover:text-gold-dark truncate max-w-xs"
+                              >
+                                {interview.videoUrl}
+                              </a>
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Meta Info */}
+                        <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500 pt-2 border-t border-gray-200">
+                          <span className="flex items-center gap-1">
+                            <CalendarDays className="h-3 w-3" />
+                            Year: {getYear(interview.date)}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <User className="h-3 w-3" />
+                            Guest: {interview.guest}
+                          </span>
+                          {interview.team && (
+                            <span className="flex items-center gap-1">
+                              <Users className="h-3 w-3" />
+                              {interview.team}
+                            </span>
+                          )}
+                          <span className="flex items-center gap-1">
+                            {interview.type === 'video' ? (
+                              <Video className="h-3 w-3 text-red-500" />
+                            ) : (
+                              <Image className="h-3 w-3 text-blue-500" />
+                            )}
+                            Type: {interview.type}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   )}
                 </div>
-
-                {/* Content - Mini */}
-                <div className="p-3">
-                  <h3 className="font-semibold text-army text-sm line-clamp-1 group-hover:text-gold transition-colors">
-                    {interview.title}
-                  </h3>
-                  
-                  <div className="flex items-center gap-1.5 mt-1">
-                    <User className="h-3 w-3 text-gold" />
-                    <p className="text-xs text-gray-600 truncate">{interview.guest}</p>
-                  </div>
-                  
-                  {interview.team && (
-                    <p className="text-[10px] text-gray-400 truncate mt-0.5">{interview.team}</p>
-                  )}
-                  
-                  <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
-                    <span className="text-[10px] text-gray-400 flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      {formatDate(interview.date)}
-                    </span>
-                    
-                    <div className="flex items-center gap-1">
-                      {interview.type === 'video' && interview.videoUrl && (
-                        <button 
-                          className="text-[10px] bg-red-50 text-red-600 hover:bg-red-600 hover:text-white px-2 py-0.5 rounded transition-colors flex items-center gap-0.5"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openVideo(interview.videoUrl);
-                          }}
-                        >
-                          <Play className="h-3 w-3" />
-                          Watch
-                        </button>
-                      )}
-                      <button 
-                        className="text-[10px] bg-gold/10 text-gold hover:bg-gold hover:text-white px-2 py-0.5 rounded transition-colors flex items-center gap-0.5"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedInterview(interview);
-                        }}
-                      >
-                        <Eye className="h-3 w-3" />
-                        View
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {filteredInterviews.length === 0 && (
@@ -237,133 +331,6 @@ export function Interviews() {
           )}
         </div>
       </Container>
-
-      {/* Interview Detail Modal */}
-      {selectedInterview && (
-        <div
-          className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4"
-          onClick={() => setSelectedInterview(null)}
-        >
-          <div
-            className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="sticky top-0 bg-white z-10 p-4 border-b border-gray-100 flex items-center justify-between">
-              <h2 className="font-display text-xl font-bold text-army">Interview Details</h2>
-              <button
-                onClick={() => setSelectedInterview(null)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-
-            <div className="p-6">
-              {/* Image/Video Display */}
-              {selectedInterview.type === 'video' && selectedInterview.videoUrl ? (
-                <div className="aspect-video bg-gray-900 rounded-lg overflow-hidden mb-4">
-                  {selectedInterview.videoUrl.includes('youtube.com') || selectedInterview.videoUrl.includes('youtu.be') ? (
-                    <iframe
-                      src={selectedInterview.videoUrl.includes('watch?v=') 
-                        ? selectedInterview.videoUrl.replace('watch?v=', 'embed/') 
-                        : selectedInterview.videoUrl.includes('youtu.be')
-                          ? `https://www.youtube.com/embed/${extractYouTubeId(selectedInterview.videoUrl)}`
-                          : selectedInterview.videoUrl}
-                      className="w-full h-full"
-                      allowFullScreen
-                      title={selectedInterview.title}
-                    />
-                  ) : (
-                    <video
-                      src={selectedInterview.videoUrl}
-                      controls
-                      className="w-full h-full"
-                    />
-                  )}
-                </div>
-              ) : hasImage(selectedInterview) ? (
-                <div className="w-full max-h-96 overflow-hidden rounded-lg mb-4">
-                  <img
-                    src={selectedInterview.image}
-                    alt={selectedInterview.title}
-                    className="w-full h-full object-contain"
-                    onError={(e) => {
-                      e.target.src = FALLBACK_IMAGE;
-                    }}
-                  />
-                </div>
-              ) : null}
-
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="font-display text-2xl font-bold text-army">{selectedInterview.title}</h3>
-                  
-                  <div className="flex flex-wrap items-center gap-3 mt-2">
-                    <span className="flex items-center gap-1 text-sm text-gray-600">
-                      <User className="h-4 w-4 text-gold" />
-                      {selectedInterview.guest}
-                    </span>
-                    {selectedInterview.team && (
-                      <span className="text-sm text-gray-400">| {selectedInterview.team}</span>
-                    )}
-                    <span className="text-sm text-gray-400">|</span>
-                    <span className="flex items-center gap-1 text-sm text-gray-400">
-                      <Calendar className="h-4 w-4" />
-                      {formatDate(selectedInterview.date)}
-                    </span>
-                    <span className="text-sm text-gray-400">|</span>
-                    <span className="flex items-center gap-1 text-sm text-gray-400">
-                      <CalendarDays className="h-4 w-4" />
-                      Year: {getYear(selectedInterview.date)}
-                    </span>
-                  </div>
-                </div>
-
-                {selectedInterview.type === 'video' && selectedInterview.videoUrl && (
-                  <button
-                    onClick={() => openVideo(selectedInterview.videoUrl)}
-                    className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium"
-                  >
-                    <Play className="h-4 w-4" />
-                    Watch Full Video
-                    <ExternalLink className="h-3 w-3" />
-                  </button>
-                )}
-              </div>
-
-              <div className="mt-4 prose max-w-none">
-                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                  {selectedInterview.content}
-                </p>
-              </div>
-
-              {selectedInterview.type === 'video' && selectedInterview.videoUrl && (
-                <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                  <p className="text-xs text-gray-500 flex items-center gap-2">
-                    <Link2 className="h-3 w-3" />
-                    Video Link: 
-                    <a 
-                      href={selectedInterview.videoUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-gold hover:text-gold-dark truncate max-w-xs"
-                    >
-                      {selectedInterview.videoUrl}
-                    </a>
-                  </p>
-                </div>
-              )}
-
-              <button
-                onClick={() => setSelectedInterview(null)}
-                className="mt-6 w-full bg-gold text-white py-2 rounded-lg hover:bg-gold-dark transition-colors"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </section>
   );
 }
