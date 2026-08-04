@@ -6,11 +6,13 @@ import { AuthProvider } from './context/AuthContext';
 import { SiteProvider } from './context/SiteContext';
 import { ScrollProvider } from './context/ScrollContext';
 import { SizeProvider } from './context/SizeContext';
+import { ChatProvider } from './context/ChatContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import ScrollToTop from './components/ScrollToTop';
 import MaintenanceModal from './components/MaintenanceModal';
 import RightClickProtection from './components/RightClickProtection';
 import NetworkStatus from './components/NetworkStatus';
+import Chatbot from './components/Chatbot';
 
 // Components
 import { Navbar } from './components/Navbar';
@@ -249,39 +251,42 @@ function App() {
     <AuthProvider>
       <SiteProvider>
         <SizeProvider>
-          <ScrollProvider>
-            <BrowserRouter>
-              <AnimatedRoutes />
-              <RightClickProtection />
-              <NoticeModal />
-              <MaintenanceModal />
-              <NetworkStatus />
-              <Toaster 
-                position="top-right"
-                toastOptions={{
-                  duration: 4000,
-                  style: {
-                    background: '#363636',
-                    color: '#fff',
-                  },
-                  success: {
-                    duration: 3000,
-                    style: {
-                      background: '#1F3D2B',
-                      color: '#fff',
-                    },
-                  },
-                  error: {
+          <ChatProvider>
+            <ScrollProvider>
+              <BrowserRouter>
+                <AnimatedRoutes />
+                <RightClickProtection />
+                <NoticeModal />
+                <MaintenanceModal />
+                <NetworkStatus />
+                <Chatbot />
+                <Toaster 
+                  position="top-right"
+                  toastOptions={{
                     duration: 4000,
                     style: {
-                      background: '#8B2331',
+                      background: '#363636',
                       color: '#fff',
                     },
-                  },
-                }}
-              />
-            </BrowserRouter>
-          </ScrollProvider>
+                    success: {
+                      duration: 3000,
+                      style: {
+                        background: '#1F3D2B',
+                        color: '#fff',
+                      },
+                    },
+                    error: {
+                      duration: 4000,
+                      style: {
+                        background: '#8B2331',
+                        color: '#fff',
+                      },
+                    },
+                  }}
+                />
+              </BrowserRouter>
+            </ScrollProvider>
+          </ChatProvider>
         </SizeProvider>
       </SiteProvider>
     </AuthProvider>
