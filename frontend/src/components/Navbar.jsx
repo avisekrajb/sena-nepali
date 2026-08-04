@@ -272,7 +272,7 @@ export function Navbar() {
           scrolled ? 'shadow-[0_1px_2px_rgba(16,24,40,0.08)]' : ''
         }`}
       >
-        {/* Top bar - Now with #FCC202 background */}
+        {/* Top bar */}
         <div className="relative bg-[#FCC202] border-b-2 border-army/20 py-2">
           <Container className="flex h-24 items-center justify-between">
             <Link to="/" className="flex items-center gap-4 group">
@@ -304,7 +304,7 @@ export function Navbar() {
                 </span>
               </div>
 
-              {/* Mobile Menu Toggle */}
+              {/* Mobile Menu Toggle - Only visible on mobile */}
               <button
                 onClick={() => setOpen((v) => !v)}
                 className="lg:hidden grid h-11 w-11 place-items-center rounded-lg text-army hover:bg-army/10 transition-colors"
@@ -316,8 +316,8 @@ export function Navbar() {
           </Container>
         </div>
 
-        {/* Desktop Nav - Now with #FCC202 background */}
-        <nav className="hidden lg:block bg-[#FCC202] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] relative overflow-visible">
+        {/* Desktop Nav - Search + Font Controls Here */}
+        <nav className="hidden lg:block bg-army shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] relative overflow-visible">
           <Container className="flex items-center justify-between overflow-visible">
             <div className="flex items-center gap-1 overflow-visible no-scrollbar flex-1">
               {navItems.map(([key, config]) => (
@@ -331,8 +331,8 @@ export function Navbar() {
                 >
                   <button
                     onClick={(e) => handleNavClick(key, config, e)}
-                    className={`relative px-3 py-2.5 text-sm font-medium text-army transition-colors whitespace-nowrap flex items-center gap-1.5 rounded-md hover:bg-army/10 ${
-                      isItemActive(config) ? 'text-army bg-army/10' : 'text-army'
+                    className={`relative px-3 py-2.5 text-sm font-medium text-white/90 hover:text-white transition-colors whitespace-nowrap flex items-center gap-1.5 rounded-md hover:bg-white/10 ${
+                      isItemActive(config) ? 'text-white bg-white/10' : ''
                     }`}
                   >
                     {config.label}
@@ -360,8 +360,8 @@ export function Navbar() {
                               key={item.to}
                               to={item.to}
                               onClick={() => setActiveDropdown(null)}
-                              className={`block px-4 py-2.5 text-sm text-gray-700 hover:bg-[#FCC202] hover:text-army transition-colors ${
-                                location.pathname === item.to ? 'bg-[#FCC202] text-army' : ''
+                              className={`block px-4 py-2.5 text-sm text-gray-700 hover:bg-army hover:text-white transition-colors ${
+                                location.pathname === item.to ? 'bg-army text-white' : ''
                               }`}
                             >
                               {item.label}
@@ -375,20 +375,22 @@ export function Navbar() {
               ))}
             </div>
 
-            {/* Desktop Right Controls */}
+            {/* Desktop Right Controls - Search (Left) + Font Size (Right) */}
             <div className="flex items-center gap-2">
+              {/* Search Button - Left Side */}
               <button
                 onClick={() => setSearchOpen(true)}
-                className="p-1.5 rounded-md text-army hover:bg-army/10 transition-colors hover:scale-110 duration-200"
+                className="p-1.5 rounded-md text-white/70 hover:text-white hover:bg-white/10 transition-colors hover:scale-110 duration-200"
                 aria-label="Search"
               >
                 <Search className="h-4 w-4" />
               </button>
 
+              {/* Font Size Control - Right Side */}
               <div className="relative" ref={sizeControlRef}>
                 <button
                   onClick={() => setShowSizeControls(!showSizeControls)}
-                  className="p-1.5 rounded-md text-army hover:bg-army/10 transition-colors hover:scale-110 duration-200"
+                  className="p-1.5 rounded-md text-white/70 hover:text-white hover:bg-white/10 transition-colors hover:scale-110 duration-200"
                   aria-label="Font size controls"
                   title="Font Size"
                 >
@@ -447,6 +449,7 @@ export function Navbar() {
                     <div className="flex gap-1 mt-2 pt-2 border-t border-gray-100">
                       <button
                         onClick={() => {
+                          // Reset to default (100%)
                           const current = fontSize;
                           if (current < 1) increaseSize();
                           if (current > 1) decreaseSize();
@@ -458,6 +461,7 @@ export function Navbar() {
                       </button>
                       <button
                         onClick={() => {
+                          // Set to 100%
                           const current = fontSize;
                           if (current < 1) increaseSize();
                           if (current > 1) decreaseSize();
@@ -486,7 +490,7 @@ export function Navbar() {
           </Container>
         </nav>
 
-        {/* Mobile Menu - Now with #FCC202 background */}
+        {/* Mobile Menu */}
         <AnimatePresence>
           {open && (
             <motion.div
@@ -494,13 +498,13 @@ export function Navbar() {
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.25 }}
-              className="lg:hidden bg-[#FCC202] overflow-hidden max-h-[80vh] overflow-y-auto relative z-[9999]"
+              className="lg:hidden bg-army overflow-hidden max-h-[80vh] overflow-y-auto relative z-[9999]"
             >
               <Container className="py-4 flex flex-col gap-1">
                 {navItems.map(([key, config]) => {
                   const isMobileOpen = mobileDropdown === key;
                   return (
-                    <div key={key} className="border-b border-army/10 last:border-0">
+                    <div key={key} className="border-b border-white/10 last:border-0">
                       <button
                         onClick={() => {
                           if (config.dropdown && config.dropdown.length > 0) {
@@ -509,7 +513,7 @@ export function Navbar() {
                             navigate(config.to);
                           }
                         }}
-                        className="w-full px-4 py-3 rounded-lg text-sm font-medium text-army hover:bg-army/10 transition-colors flex items-center justify-between"
+                        className="w-full px-4 py-3 rounded-lg text-sm font-medium text-white hover:bg-white/10 transition-colors flex items-center justify-between"
                       >
                         {config.label}
                         {config.dropdown && config.dropdown.length > 0 && (
@@ -533,7 +537,7 @@ export function Navbar() {
                                 <Link
                                   key={item.to}
                                   to={item.to}
-                                  className="block px-4 py-2.5 rounded-lg text-sm text-army/80 hover:bg-army/10 hover:text-army transition-colors"
+                                  className="block px-4 py-2.5 rounded-lg text-sm text-white/80 hover:bg-white/10 hover:text-white transition-colors"
                                 >
                                   {item.label}
                                 </Link>
@@ -547,21 +551,23 @@ export function Navbar() {
                 })}
 
                 {/* Mobile Search & Font Controls */}
-                <div className="px-4 py-3 border-b border-army/10">
+                <div className="px-4 py-3 border-b border-white/10">
+                  {/* Search */}
                   <button
                     onClick={() => {
                       setOpen(false);
                       setSearchOpen(true);
                     }}
-                    className="w-full flex items-center gap-3 text-army/80 hover:text-army hover:bg-army/10 px-3 py-2 rounded-lg transition-colors"
+                    className="w-full flex items-center gap-3 text-white/80 hover:text-white hover:bg-white/10 px-3 py-2 rounded-lg transition-colors"
                   >
                     <Search className="h-5 w-5" />
                     <span className="text-sm font-medium">Search</span>
                   </button>
                   
-                  <div className="flex items-center gap-3 mt-2 px-3 py-2 rounded-lg hover:bg-army/5">
-                    <Type className="h-4 w-4 text-army/60" />
-                    <span className="text-sm text-army/60">Font Size</span>
+                  {/* Font Size Controls */}
+                  <div className="flex items-center gap-3 mt-2 px-3 py-2 rounded-lg hover:bg-white/5">
+                    <Type className="h-4 w-4 text-white/60" />
+                    <span className="text-sm text-white/60">Font Size</span>
                     <div className="flex-1 flex items-center justify-end gap-2">
                       <button
                         onClick={decreaseSize}
@@ -569,12 +575,12 @@ export function Navbar() {
                         className={`p-1 rounded-md transition-colors ${
                           fontSize <= MIN_SIZE 
                             ? 'text-gray-500 cursor-not-allowed' 
-                            : 'text-army/60 hover:text-army hover:bg-army/10'
+                            : 'text-white/60 hover:text-white hover:bg-white/10'
                         }`}
                       >
                         <Minus className="h-3 w-3" />
                       </button>
-                      <span className="text-xs text-army/60 min-w-[35px] text-center">
+                      <span className="text-xs text-white/60 min-w-[35px] text-center">
                         {sizePercentage}%
                       </span>
                       <button
@@ -583,7 +589,7 @@ export function Navbar() {
                         className={`p-1 rounded-md transition-colors ${
                           fontSize >= MAX_SIZE 
                             ? 'text-gray-500 cursor-not-allowed' 
-                            : 'text-army/60 hover:text-army hover:bg-army/10'
+                            : 'text-white/60 hover:text-white hover:bg-white/10'
                         }`}
                       >
                         <Plus className="h-3 w-3" />
@@ -597,7 +603,7 @@ export function Navbar() {
         </AnimatePresence>
       </motion.header>
 
-      {/* Search Modal - Keep as is */}
+      {/* Search Modal */}
       <AnimatePresence>
         {searchOpen && (
           <motion.div
