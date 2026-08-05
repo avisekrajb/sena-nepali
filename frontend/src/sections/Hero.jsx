@@ -523,19 +523,19 @@ export function Hero() {
                   राष्ट्र सेवाबाट
                   <br />
                   <motion.span
-                    className="text-gold inline-block mt-4 md:mt-6"
-                    whileHover={{ color: "#8B2331" }}
+                 className="text-[#26532F] inline-block mt-4 md:mt-6"
+             whileHover={{ color: "#26532F" }}
                     transition={{ duration: 0.3 }}
                   >
                     समाज सेवातर्फ
                   </motion.span>
                 </motion.h1>
-                <motion.p 
-                  className="hero-sub mt-4 md:mt-6 max-w-2xl text-lg sm:text-lg md:text-xl text-gray-700 leading-relaxed"
-                  variants={fadeInUp}
-                >
-                  नेपालका भूपू सैनिकहरूको एकता, सम्मान, सेवा र राष्ट्र निर्माणप्रतिको निरन्तर प्रतिबद्धता।
-                </motion.p>
+               <motion.p
+  className="hero-sub mt-4 md:mt-6 max-w-2xl text-lg sm:text-lg md:text-xl text-gray-700 leading-relaxed font-bold italic"
+  variants={fadeInUp}
+>
+  नेपालका भूपू सैनिकहरूको एकता, सम्मान, सेवा र राष्ट्र निर्माणप्रतिको निरन्तर प्रतिबद्धता।
+</motion.p>
 
                 {/* Seniors Slider - 2/2 Grid with Continuous 360 Rotation Effect */}
                 {personData.length > 0 && (
@@ -1005,4 +1005,4 @@ export function Hero() {
   );
 }
 
-export default Hero;
+export default Hero;  
